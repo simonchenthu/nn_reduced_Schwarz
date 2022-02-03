@@ -4,6 +4,8 @@ The source code for the paper [S. Chen, Z. Ding, Q. Li, S. J. Wright. A reduced 
 
 ## Organization
 
+Most codes are written in Matlab (version R2021a), and the codes to train neural networks are written in Python 3 and Pytorch. 
+
 - `src`: contains the local PDE solvers, the reduced order Schwarz solvers and all the sub routines
 - `examples`: contains one example of semilinear elliptic equations and one example of p-Poisson equations
 
