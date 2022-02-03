@@ -1,0 +1,121 @@
+%  Generate solutions on each interior patch, and save them on separated files
+clear;
+addpath(genpath('../src'))
+
+%%  Domain parameters  %%
+
+Lx = 1.0; Nx = 2^(8); Dx_buffer = 2^(-4); Dx_overlap = 2^(-4); 
+dx = Lx/Nx; x0 = 0:dx:Lx; Nx = length(x0); Mx = 4; 
+Ly = 1.0; Ny = 2^(8); Dy_buffer = 2^(-4); Dy_overlap = 2^(-4); 
+dy = Ly/Ny; y0 = 0:dy:Ly; Ny = length(y0); My = 4; 
+
+x_sw_o = 0:Lx/Mx:Lx-Lx/Mx; x_sw_o = max(x_sw_o-Dx_overlap,0);
+y_sw_o = 0:Ly/My:Ly-Ly/My; y_sw_o = max(y_sw_o-Dy_overlap,0);
+x_ne_o = Lx/Mx:Lx/Mx:Lx; x_ne_o = min(x_ne_o+Dx_overlap,Ly);
+y_ne_o = Ly/My:Ly/My:Ly; y_ne_o = min(y_ne_o+Dy_overlap,Ly);
+
+x_sw_b = 0:Lx/Mx:Lx-Lx/Mx; x_sw_b = max(x_sw_b-Dx_overlap-Dx_buffer,0);
+y_sw_b = 0:Ly/My:Ly-Ly/My; y_sw_b = max(y_sw_b-Dy_overlap-Dy_buffer,0);
+x_ne_b = Lx/Mx:Lx/Mx:Lx; x_ne_b = min(x_ne_b+Dx_overlap+Dx_buffer,Ly);
+y_ne_b = Ly/My:Ly/My:Ly; y_ne_b = min(y_ne_b+Dy_overlap+Dy_buffer,Ly);
+
+
+%%  Equation parameters  %%
+
+n = 4;
+epsilon = 2^(-n);
+
+f = @(u) u.^3;
+del_f = @(u) 3*u.^2;   
+f_no = 1;
+
+a = @(x,y) 2+sin(2*pi*x).*cos(2*pi*y)...
+    +(2+1.8*sin(2*pi*x/epsilon))./(2+1.8*cos(2*pi*y/epsilon))...
+    +(2+sin(2*pi*y/epsilon))./(2+1.8*cos(2*pi*x/epsilon));
+a_n = 1;
+
+
+%%  Sampling  Parameters  %%
+N_train = 10000;
+
+radius_n = 1000;
+          
+dim_r = 3;
+          
+%%  Generate datasets  %%
+% rng('default');
+rng('shuffle');
+for k = 2:My-1
+    for j = 2:Mx-1
+        
+        t_start = tic;
+        
+        %% Generate random boundary conditions
+        % x/y range for buffered patches
+        x_patch_b = x_sw_b(j):dx:x_ne_b(j);
+        y_patch_b = y_sw_b(k):dx:y_ne_b(k);
+        
+        [bdy_s,bdy_n,bdy_w,bdy_e] = rand_bdy_H12(N_train,dim_r,radius_n,...
+                                                x_patch_b,y_patch_b,dx);
+        
+        % Make the boundary conditions positive
+        bdy_s = abs(bdy_s); bdy_n = abs(bdy_n);
+        bdy_w = abs(bdy_w); bdy_e = abs(bdy_e);
+        
+        
+        %%       Local Solver     %%
+        
+        x_patch_o = x_sw_o(j):dx:x_ne_o(j);
+        y_patch_o = y_sw_o(k):dx:y_ne_o(k);
+        
+        Nx_patch_o = length(x_patch_o);
+        Ny_patch_o = length(y_patch_o);
+        
+        DNx_b1 = Dx_buffer/dx; 
+        DNx_b2 = Dx_buffer/dx;
+        DNy_b1 = Dy_buffer/dx;
+        DNy_b2 = Dy_buffer/dx;
+        DNx_bo1 = (Dx_buffer+2*Dx_overlap)/dx;
+        DNx_bo2 = (Dx_buffer+2*Dx_overlap)/dx;
+        DNy_bo1 = (Dy_buffer+2*Dy_overlap)/dx;
+        DNy_bo2 = (Dy_buffer+2*Dy_overlap)/dx;
+        
+        
+        phi = zeros(N_train, 2*Nx_patch_o+2*Ny_patch_o);
+        phi_int = zeros(N_train, 2*Nx_patch_o+2*Ny_patch_o);
+        
+        for i=1:N_train
+            
+            u_temp = semilinear_elliptic_newton(x_patch_b,y_patch_b,dx,f,del_f,a,...
+                                        bdy_w(:,i),bdy_e(:,i),bdy_s(:,i),bdy_n(:,i));
+            
+            % [South, North, West, East]
+            phi(i,:) = [u_temp(DNy_b1+1,DNx_b1+1:end-DNx_b2),...
+                        u_temp(end-DNy_b2,DNx_b1+1:end-DNx_b2),...
+                        u_temp(DNy_b1+1:end-DNy_b2,DNx_b1+1)',...
+                        u_temp(DNy_b1+1:end-DNy_b2,end-DNx_b2)'];
+            
+            phi_int(i,:) = [u_temp(DNy_bo1+1,DNx_b1+1:end-DNx_b2),...
+                            u_temp(end-DNy_bo2,DNx_b1+1:end-DNx_b2),...
+                            u_temp(DNy_b1+1:end-DNy_b2,DNx_bo1+1)',...
+                            u_temp(DNy_b1+1:end-DNy_b2,end-DNx_bo2)'];
+                          
+        end
+        
+        t_dic = toc(t_start);
+        
+        
+        %% Save
+        save(fullfile('data_semilinear',['data',...
+            '_Mx',int2str(Mx),'_My',int2str(My),'_(',int2str(j),',',int2str(k),')',...
+            '_Ntrain',int2str(N_train),'_dxb',sprintf('%.3e',Dx_buffer),...
+            '.mat']),'phi','phi_int','t_dic');
+        
+        
+    end
+end
+
+
+
+
+
