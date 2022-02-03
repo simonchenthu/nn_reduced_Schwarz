@@ -9,7 +9,7 @@ Most codes are written in Matlab (version R2021a), and the codes to train neural
 - `src`: contains the local PDE solvers, the reduced order Schwarz solvers and all the sub routines
 - `examples`: contains one example of semilinear elliptic equations and one example of p-Poisson equations
 
-The run time to generate offline dictionaries could be between several minutes to several hours depending on the parameters, e.g., the discretization and the dataset size.
+The run time to generate training dataset and the training of neural networks could be between several minutes to several hours depending on the parameters, e.g., the discretization, the dataset size and the number of iterations for training.
 
 ## Instructions for use
 
