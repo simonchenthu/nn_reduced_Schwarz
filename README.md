@@ -25,7 +25,7 @@ The instructions for running each case are as follows.
 1. Run pPoi_data.m, which will generate training dataset on each local patch and save them in data_semilinear
 2. Run pPoi_init.m, which will generate initial weights used in the training of neural networks
 3. Run pPoi_NN.py to train the neural networks that learns the boundary-to-boundary operator in the Schwarz iteration
-4. Run pPoi_online.m to solve the p-Poisson elliptic equations
+4. Run pPoi_online.m to solve the p-Poisson equations
 
 ## Cite this work
 
