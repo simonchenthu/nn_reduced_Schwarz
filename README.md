@@ -1,4 +1,4 @@
-# A two-layer neural network-based reduced order Schwarz method for fully nonlinear mutitscale elliptic PDEs
+# A two-layer neural network-based reduced order Schwarz method for fully nonlinear multiscale elliptic PDEs
 
 The source code for the paper [S. Chen, Z. Ding, Q. Li, S. J. Wright. A reduced order Schwarz method for nonlinear multiscale elliptic equations based on two-layer neural networks. arXiv:2111.02280](https://arxiv.org/abs/2111.02280).
 
