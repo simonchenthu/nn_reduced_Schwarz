@@ -84,9 +84,9 @@ for k in range(2,My):
                 self.fc1 = nn.Linear(dim_inputs, N_neuron)
                 self.fc2 = nn.Linear(N_neuron, dim_labels)
 
-                self.fc1.weight.data = torch.tensor(data_init['V_init'],dtype = torch.double).t()
+                self.fc1.weight.data = torch.tensor(data_init['U_init'],dtype = torch.double).t()
                 self.fc1.bias.data = torch.zeros(1,N_neuron)
-                self.fc2.weight.data = torch.tensor(data_init['U_init'],dtype = torch.double)
+                self.fc2.weight.data = torch.tensor(data_init['V_init'],dtype = torch.double)
                 self.fc2.bias.data = torch.zeros(1,dim_labels)
 
             def forward(self, x):
