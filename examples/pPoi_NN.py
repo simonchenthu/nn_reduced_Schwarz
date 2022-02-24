@@ -52,9 +52,6 @@ for k in range(2,My):
         train_inputs = torch.tensor(data['phi'],dtype = torch.double)
         train_labels = torch.tensor(data['phi_int'],dtype = torch.double)
 
-        test_inputs = torch.tensor(data['phi'],dtype = torch.double)
-        test_labels = torch.tensor(data['phi_int'],dtype = torch.double)
-
         N_neuron = int(data_init['N_neuron'])
         dim_inputs = train_inputs.size(1)
         dim_labels = train_labels.size(1)
@@ -69,7 +66,6 @@ for k in range(2,My):
 
         # Differentiate the outputs
         train_labels_d = (train_labels[:,1:] - train_labels[:,:-1]) / dx * mask
-        test_labels_d = (test_labels[:,1:] - test_labels[:,:-1]) / dx * mask
 
         
         # Print data info
@@ -177,17 +173,7 @@ for k in range(2,My):
         for name, param in net.named_parameters():
             param_outputs.update({str(name).replace(".","_"): np.array(param.data)})
         
-        io.savemat("data_pPoi/NN_param_Mx{:d}_My{:d}_({:d},{:d})_Ntrain{:d}_dxb{:.3e}.mat".format(Mx, My, j, k, Nt, Dx_buffer), param_outputs)
-
-
-# In[9]:
-
-
-'{:d}, {:.2f}, {:.3e}'.format(2, 4.4, 2**(-5) + 2**(-4))
-
-
-# In[ ]:
-
+        io.savemat("data_pPoi/NN_param_Mx{:d}_My{:d}_({:d},{:d})_Ntrain{:d}_dxb{:.3e}.mat".format(Mx, My, j, k, Nt, Dx_buffer),param_outputs)
 
 
 
